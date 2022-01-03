@@ -30,7 +30,7 @@ body {
 }
 
 .card {
-    width: 23%;
+    width: 22%;
     height: 23%;
     margin: 5px;
 
@@ -40,9 +40,17 @@ body {
     background-size: cover;
 }
 
-.disabled {
+.matched {
+    border: 3px solid orange;
+    margin: 2px;
     pointer-events: none;
     opacity: 0.8;
+}
+
+.selected {
+    border: 3px solid yellow;
+    margin: 2px;
+    pointer-events: none;
 }
 
 .kim {

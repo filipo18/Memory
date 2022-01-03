@@ -1,56 +1,19 @@
-const kim = {
-    type: "kim",
-    img: "../images/kim.jpeg",
-};
-
-const putin = {
-    type: "putin",
-    img: "../images/putin.jpeg",
-};
-
-const trump = {
-    type: "trump",
-    img: "../images/trump.jpeg",
-};
-
-const stalin = {
-    type: "stalin",
-    img: "../images/stalin.jpeg",
-};
-
-const merkel = {
-    type: "merkel",
-    img: "../images/merkel.jpeg",
-};
-
-const boris = {
-    type: "boris",
-    img: "../images/boris.jpeg",
-};
-
-const jonas = {
-    type: "jonas",
-    img: "../images/jonas.jpeg",
-};
-
-const jinping = {
-    type: "jinping",
-    img: "../images/jinping.jpeg",
-};
-
 const deckMap = {
-    c0: kim,
-    c1: putin,
-    c2: trump,
-    c3: stalin,
-    c4: merkel,
-    c5: boris,
-    c6: jonas,
-    c7: jinping,
+    c0: "kim",
+    c1: "putin",
+    c2: "trump",
+    c3: "stalin",
+    c4: "merkel",
+    c5: "boris",
+    c6: "jonas",
+    c7: "jinping",
 };
 
 function GameState(socket) {
     this.socket = socket;
+    this.guess = [];
+    this.playerType = null; // A or B
+    this.myTurn = null;
 }
 /*
 GameState.prototype.shuffleCards = function () {
@@ -68,28 +31,72 @@ GameState.prototype.shuffleCards = function () {
 };
 */
 
-GameState.prototype.updateGame = function (clickedCard) {};
+GameState.prototype.updateGame = function (clickedCard) {
+    this.socket.send(
+        JSON.stringify({
+            type: "CLICKED-CARD",
+            data: clickedCard.id,
+        })
+    );
+};
 
-function setCards(cards) {
-    const grid = document.querySelector(".grid");
+function CardBoard(gs) {
+    this.cards = document.querySelectorAll(".card");
 
-    for (var i = 0; i < 16; i++) {
-        const newCell = document.createElement("div");
-        const type = deckMap[cards[i]].type;
-        newCell.classList.add("card", "facedown", type);
-        newCell.id = cards[i];
-        newCell.addEventListener("click", clickCard);
-        grid.appendChild(newCell);
-    }
-}
+    this.initialize = function (deck) {
+        Array.from(this.cards).forEach(function (el, index) {
+            el.classList.add(deck[index]);
+            el.addEventListener("click", function clicked(e) {
+                if (gs.myTurn) {
+                    el.classList.toggle("facedown");
+                    el.classList.add("selected");
+                    gs.guess.push(el.id);
 
-function clickCard(e) {
-    this.classList.toggle("facedown");
-    //socket.send(JSON.stringify());
-}
+                    const sendMsg = {
+                        type: "GUESSED-ONE",
+                        data: gs.guess,
+                        from: gs.playerType,
+                    };
 
-function cardMatch(c1, c2) {
-    return deckMap[c1.id].type === deckMap[c2.id].type;
+                    if (gs.guess.length >= 2) {
+                        // Max guesses reached
+                        sendMsg.type = "GUESSED-TWO";
+                        gs.myTurn = false;
+                        gs.guess = [];
+                    }
+
+                    gs.socket.send(JSON.stringify(sendMsg));
+                } else {
+                    console.log("Not my turn.");
+                }
+            });
+        });
+    };
+
+    this.eraseGuess = function () {
+        Array.from(this.cards).forEach(function (el) {
+            if (!el.classList.contains("matched")) {
+                el.classList.add("facedown");
+            }
+            el.classList.remove("selected");
+        });
+    };
+
+    this.reveal = function (cardID) {
+        for (var i = 0; i < cardID.length; i++) {
+            const card = document.getElementById(cardID[i]);
+            card.classList.remove("facedown");
+            card.classList.add("selected");
+        }
+    };
+
+    this.match = function (cardID) {
+        for (var i = 0; i < cardID.length; i++) {
+            const card = document.getElementById(cardID[i]);
+            card.classList.remove("facedown", "selected");
+            card.classList.add("matched");
+        }
+    };
 }
 
 (function setup() {
@@ -97,22 +104,44 @@ function cardMatch(c1, c2) {
 
     const gs = new GameState(socket);
 
-    let btn = document.getElementById("btn");
-
-    btn.addEventListener("click", function (e) {
-        socket.send(e);
-    });
+    const cb = new CardBoard(gs);
 
     socket.onmessage = function (event) {
-        console.log("Got a message:");
-        // console.log(event.data.toString());
+        let msg = JSON.parse(event.data);
+        console.log("Received message:");
+        console.log(msg);
 
-        const { data } = event;
-        const obj = JSON.parse(data);
+        if (msg.type === "DECK") {
+            console.log("Received DECK");
+            cb.initialize(msg.data);
+            gs.playerType = msg.playerType;
+            gs.myTurn = gs.playerType === "A" ? true : false;
+        }
 
-        if (obj.deck !== "undefined") {
-            console.log(obj);
-            setCards(obj["deck"]);
+        if (msg.type === "GUESSED-ONE") {
+            // Receive guess from other player
+            cb.reveal(msg.data);
+        }
+
+        if (msg.type === "GUESSED-TWO") {
+            // Receive guess from other player
+
+            if (msg.match == true) {
+                cb.match(msg.data);
+            } else {
+                cb.reveal(msg.data);
+            }
+
+            setTimeout(function () {
+                cb.eraseGuess();
+                if (gs.playerType !== msg.from) {
+                    gs.myTurn = true;
+                }
+            }, 3000);
+        }
+
+        if (msg.type === "START" && gs.myTurn == true) {
+            cb.eraseGuess();
         }
     };
 })();

@@ -6,16 +6,18 @@ const Game = function (gameID) {
     this.playerB = null;
     this.id = gameID;
     this.guesses = {
-        playerA: 0,
-        playerB: 0,
+        A: 0,
+        B: 0,
     };
     this.points = {
-        playerA: 0,
-        playerB: 0,
+        A: 0,
+        B: 0,
     };
     this.gameState = "0 PLAYERS";
     this.deck = this.generateDeck();
     this.currentGuess = [];
+    this.result = null;
+    this.currentTurn = "A";
 };
 
 Game.prototype.hasTwoPlayers = function () {
@@ -23,6 +25,13 @@ Game.prototype.hasTwoPlayers = function () {
 };
 
 Game.prototype.addPlayer = function (con) {
+    // Invalid call
+    if (this.gameState != "0 PLAYERS" && this.gameState != "1 PLAYERS") {
+        return new Error(
+            `Invalid call to addPlayer, current state is ${this.gameState}`
+        );
+    }
+
     if (this.gameState === "0 PLAYERS") {
         this.playerA = con;
         this.gameState = "1 PLAYERS";
@@ -35,25 +44,17 @@ Game.prototype.addPlayer = function (con) {
 };
 
 Game.prototype.generateDeck = function () {
-    const deck = [];
-
-    deck.push("c0");
-    deck.push("c1");
-    deck.push("c2");
-    deck.push("c3");
-    deck.push("c4");
-    deck.push("c5");
-    deck.push("c6");
-    deck.push("c7");
-
-    deck.push("c0");
-    deck.push("c1");
-    deck.push("c2");
-    deck.push("c3");
-    deck.push("c4");
-    deck.push("c5");
-    deck.push("c6");
-    deck.push("c7");
+    let deck = [
+        "kim",
+        "putin",
+        "trump",
+        "jonas",
+        "jinping",
+        "merkel",
+        "boris",
+        "stalin",
+    ];
+    deck = deck.concat(deck);
 
     for (var i = deck.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
