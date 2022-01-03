@@ -1,41 +1,34 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require("express");
+const http = require("http");
+const { workerData } = require("worker_threads");
+const websocket = require("ws");
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const port = process.argv[2];
+const app = express();
 
-var app = express();
+const indexRouter = require("./routes/index");
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.use(express.static(__dirname + "/public"));
+app.set("view engine", "ejs");
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+const server = http.createServer(app);
+const wss = new websocket.Server({ server });
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.get("/play", indexRouter);
+app.get("/", indexRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+let connectionID = 0;
+
+wss.on("connection", function connection(ws) {
+    const con = ws;
+
+    con["id"] = connectionID++;
+
+    con.on("message", function message(data) {
+        console.log("received: %s", data);
+    });
+
+    con.send("Testing");
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-module.exports = app;
+server.listen(port);

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Playing Memory</title>
+    <link rel='stylesheet' href='/stylesheets/game.css' />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+</head>
+<body>
+    <div class="left">
+        <div class="grid">
+            <% for (var i = 0; i < deck.length; i++) { %>
+                <div class="card facedown <%= deck[i].type %>" id="<%= i %>"><%= i %></div>
+            <% } %>
+        </div>
+    </div>
+    <div class="right">
+        Right
+    </div>
+
+    <script src="javascripts/interactions.js"></script>
+
+</body>
+</html>
