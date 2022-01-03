@@ -40,6 +40,11 @@ body {
     background-size: cover;
 }
 
+.disabled {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
 .kim {
     background-image: url("../images/kim.jpeg");
 }

@@ -10,12 +10,13 @@
     <div class="left">
         <div class="grid">
             <% for (var i = 0; i < deck.length; i++) { %>
-                <div class="card facedown <%= deck[i].type %>" id="<%= i %>"><%= i %></div>
+                <div class="card facedown" id="c<%= i %>"><%= i %></div>
             <% } %>
         </div>
     </div>
     <div class="right">
         Right
+        <button id="btn">A button</button>
     </div>
 
     <script src="javascripts/interactions.js"></script>
