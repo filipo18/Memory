@@ -14,22 +14,11 @@ function GameState(socket) {
     this.guess = [];
     this.playerType = null; // A or B
     this.myTurn = null;
+    this.score = {
+        myScore = 0,
+        otherScore = 0,
+    }
 }
-/*
-GameState.prototype.shuffleCards = function () {
-    const cards = document.querySelectorAll(".card");
-
-    Array.from(cards).forEach(function (el) {
-        el.addEventListener("click", function clicked(e) {
-            console.log("Clicked button ID:", e.target["id"]);
-            el.classList.toggle("facedown");
-            const stringToSend = "Testing connection. ID: " + el.id;
-            // TODO generates error
-            this.socket.send(stringToSend);
-        });
-    });
-};
-*/
 
 GameState.prototype.updateGame = function (clickedCard) {
     this.socket.send(
@@ -39,6 +28,30 @@ GameState.prototype.updateGame = function (clickedCard) {
         })
     );
 };
+
+GameState.prototype.updateScore = function (player) {
+    const score = null;
+
+    if (player === this.playerType) {
+        score = document.querySelector(".opponentScore");
+    } else {
+        score = document.querySelector(".myScore");
+    }
+
+    score.innerHTML++;
+}
+
+GameState.prototype.updateMoves = function (player) {
+    const moves = null;
+
+    if (player === this.playerType) {
+        moves = document.querySelector(".opponentMoves");
+    } else {
+        moves = document.querySelector(".myMoves");
+    }
+
+    moves.innerHTML++;
+}
 
 function CardBoard(gs) {
     this.cards = document.querySelectorAll(".card");
@@ -126,8 +139,11 @@ function CardBoard(gs) {
         if (msg.type === "GUESSED-TWO") {
             // Receive guess from other player
 
+            gs.updateMoves(msg.from);
+
             if (msg.match == true) {
                 cb.match(msg.data);
+                gs.updateScore(msg.from);
             } else {
                 cb.reveal(msg.data);
             }
