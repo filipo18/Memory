@@ -14,44 +14,70 @@ function GameState(socket) {
     this.guess = [];
     this.playerType = null; // A or B
     this.myTurn = null;
-    this.score = {
-        myScore = 0,
-        otherScore = 0,
-    }
 }
 
-GameState.prototype.updateGame = function (clickedCard) {
-    this.socket.send(
-        JSON.stringify({
-            type: "CLICKED-CARD",
-            data: clickedCard.id,
-        })
-    );
+GameState.prototype.setStatus = function (statusText) {
+    document.querySelector(".status").innerHTML = "Status: " + statusText;
 };
 
 GameState.prototype.updateScore = function (player) {
-    const score = null;
+    let score = null;
 
     if (player === this.playerType) {
-        score = document.querySelector(".opponentScore");
+        score = document.querySelectorAll(".myScore");
     } else {
-        score = document.querySelector(".myScore");
+        score = document.querySelectorAll(".opponentScore");
     }
-
-    score.innerHTML++;
-}
+    score.forEach((el) => {
+        el.innerHTML++;
+    });
+};
 
 GameState.prototype.updateMoves = function (player) {
-    const moves = null;
+    let moves = null;
 
     if (player === this.playerType) {
-        moves = document.querySelector(".opponentMoves");
+        moves = document.querySelectorAll(".opponentMoves");
     } else {
-        moves = document.querySelector(".myMoves");
+        moves = document.querySelectorAll(".myMoves");
     }
 
-    moves.innerHTML++;
-}
+    moves.forEach((el) => {
+        el.innerHTML++;
+    });
+};
+
+GameState.prototype.showPopup = function (msg) {
+    document.querySelector(".popupBackground").style.display = "block";
+
+    if (msg.type === "GAMEOVER") {
+        document.querySelector(".stats").style.display = "flex";
+
+        let winner = null;
+        if (msg.points["A"] > msg.points["B"]) {
+            winner = "A";
+        } else if (msg.points["A"] < msg.points["B"]) {
+            winner = "B";
+        } else {
+            winner = "E"; // equal
+        }
+
+        const resultText = document.querySelector(".result");
+
+        if (winner === "E") {
+            resultText.innerHTML = "Draw";
+        } else if (winner === this.playerType) {
+            document.querySelector(".popup").style.backgroundColor = "green";
+            resultText.innerHTML = "You won";
+        } else {
+            document.querySelector(".popup").style.backgroundColor = "red";
+            resultText.innerHTML = "Opponent won";
+        }
+    } else {
+        // Other player left
+        document.querySelector(".opponentQuit").style.display = "block";
+    }
+};
 
 function CardBoard(gs) {
     this.cards = document.querySelectorAll(".card");
@@ -129,11 +155,13 @@ function CardBoard(gs) {
             cb.initialize(msg.data);
             gs.playerType = msg.playerType;
             gs.myTurn = gs.playerType === "A" ? true : false;
+            gs.setStatus("Waiting for opponent");
         }
 
         if (msg.type === "GUESSED-ONE") {
             // Receive guess from other player
             cb.reveal(msg.data);
+            gs.setStatus("Opponent 1/2 guesses");
         }
 
         if (msg.type === "GUESSED-TWO") {
@@ -144,20 +172,35 @@ function CardBoard(gs) {
             if (msg.match == true) {
                 cb.match(msg.data);
                 gs.updateScore(msg.from);
+                gs.setStatus("Correct guess");
             } else {
                 cb.reveal(msg.data);
+                gs.setStatus("Incorrect guess");
             }
 
             setTimeout(function () {
                 cb.eraseGuess();
                 if (gs.playerType !== msg.from) {
                     gs.myTurn = true;
+                    gs.setStatus("Your turn");
+                } else {
+                    gs.setStatus("Opponents turn");
                 }
             }, 3000);
         }
 
-        if (msg.type === "START" && gs.myTurn == true) {
-            cb.eraseGuess();
+        if (msg.type === "START") {
+            if (gs.myTurn == true) {
+                cb.eraseGuess();
+                gs.setStatus("Your turn");
+            } else {
+                gs.setStatus("Opponents turn");
+            }
+        }
+
+        if (msg.type === "GAMEOVER" || msg.type === "ABORTED") {
+            gs.showPopup(msg);
+            gs.setStatus("Game Over");
         }
     };
 })();

@@ -29,17 +29,46 @@
     </div>
     <div class="right">
         <div class="opponent">
-            <p>Moves: <div class="opponentMoves">0</div></p>
-            <p>Score: <div class="opponentScore">0</div></p>
+            <p>Opponent:</p>
+            <p>Moves: <span class="opponentMoves">0</span></p>
+            <p>Score: <span class="opponentScore">0</span></p>
         </div>
 
         <div class="me">
-            <p>Moves: <div class="myMoves">0</div></p>
-            <p>Score: <div class="myScore">0</div></p>
+            <p>Me:</p>
+            <p>Moves: <span class="myMoves">0</span></p>
+            <p>Score: <span class="myScore">0</span></p>
+        </div>
+
+        <div class="status">Status: WAITING</div>
+    </div>
+
+    <div class="popupBackground">
+        <div class="popup">
+            <h1>Game Over</h1>
+            <div class="stats">
+                <div class="yourStats">
+                    Your stats:
+                    <p>Moves: <span class="myMoves">0</span></p>
+                    <p>Score: <span class="myScore">0</span></p>
+                </div>
+                <div class="opponentStats">
+                    Opponent stats:
+                    <p>Moves: <span class="opponentMoves">0</span></p>
+                    <p>Score: <span class="opponentScore">0</span></p>
+                </div>
+                <div class="result">Result: </div>
+            </div>
+
+            <div class="opponentQuit">Opponent quit (game aborted).</div>
+            
+            <form action="/">
+                <button class="homeBtn">Start page</button>
+            </form>
         </div>
     </div>
 
-    <div class="status">Status: WAITING</div>
+    
 
     <script src="javascripts/interactions.js"></script>
 

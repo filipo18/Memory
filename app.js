@@ -58,8 +58,8 @@ wss.on("connection", function connection(ws) {
         const msg = JSON.parse(data.toString());
         const currentGame = webSockets[con["id"]];
 
-        console.log("Message received:");
-        console.log(msg);
+        // console.log("Message received:");
+        // console.log(msg);
 
         if (msg.type === "GUESSED-ONE") {
             const otherPlayer =
@@ -75,19 +75,17 @@ wss.on("connection", function connection(ws) {
         if (msg.type === "GUESSED-TWO") {
             // A complete (2 cards) guess was received
 
-            const guess1 = msg.data[0].substring(1);
+            currentGame.guesses[msg.from]++; // inc. num of guesses for player
+
+            const guess1 = msg.data[0].substring(1); // remove cXX from data
             const guess2 = msg.data[1].substring(1);
 
-            let match = true;
+            let match = false;
 
             if (currentGame.deck[guess1] === currentGame.deck[guess2]) {
                 // Correct guess
-                console.log("Correct guess");
                 match = true;
-            } else {
-                // Incorrect guess
-                console.log("Incorrect guess");
-                match = false;
+                currentGame.points[msg.from]++;
             }
 
             const matchMsg = {
@@ -95,10 +93,23 @@ wss.on("connection", function connection(ws) {
                 data: msg.data,
                 from: msg.from,
                 match: match,
+                guesses: currentGame.guesses,
+                points: currentGame.points,
             };
 
             currentGame.playerA.send(JSON.stringify(matchMsg));
             currentGame.playerB.send(JSON.stringify(matchMsg));
+
+            if (currentGame.points["A"] + currentGame.points["B"] >= 8) {
+                // game over
+                const winnerMsg = {
+                    type: "GAMEOVER",
+                    points: currentGame.points,
+                    moves: currentGame.moves,
+                };
+                currentGame.playerA.send(JSON.stringify(winnerMsg));
+                currentGame.playerB.send(JSON.stringify(winnerMsg));
+            }
         }
     });
 
@@ -108,6 +119,7 @@ wss.on("connection", function connection(ws) {
         const currentGame = webSockets[con["id"]];
 
         if (currentGame.gameState === "2 PLAYERS") {
+            console.log("TWO PLAYERS");
             currentGame.gameState = "DONE";
 
             const winner = con === currentGame.playerA ? "B" : "A";
@@ -116,11 +128,19 @@ wss.on("connection", function connection(ws) {
                 winner === "A" ? currentGame.playerA : currentGame.playerB;
 
             const sendWinnerMsg = {
-                type: "RESULT",
+                type: "ABORTED",
                 data: winner,
+                guesses: currentGame.guesses,
+                points: currentGame.points,
             };
 
             winnerSocket.send(JSON.stringify(sendWinnerMsg));
+        } else {
+            // one player in the game
+            console.log("ONE PLAYER");
+            //console.log(currentGame);
+            currentGame.gameState = "0 PLAYERS";
+            currentGame.playerA = null;
         }
     });
 });
