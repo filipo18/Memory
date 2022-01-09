@@ -4,6 +4,7 @@ const { workerData } = require("worker_threads");
 const websocket = require("ws");
 
 const Game = require("./game");
+const gameStatus = require("./statTracker");
 
 const port = process.argv[2];
 const app = express();
@@ -52,6 +53,7 @@ wss.on("connection", function connection(ws) {
         openGame.playerB.send(JSON.stringify(startMsg));
 
         openGame = new Game(gameID++);
+        gameStatus.gamesInitialized++;
     }
 
     con.on("message", function incoming(data) {
@@ -109,6 +111,7 @@ wss.on("connection", function connection(ws) {
                 };
                 currentGame.playerA.send(JSON.stringify(winnerMsg));
                 currentGame.playerB.send(JSON.stringify(winnerMsg));
+                gameStatus.gamesCompleted++;
             }
         }
     });
@@ -135,6 +138,7 @@ wss.on("connection", function connection(ws) {
             };
 
             winnerSocket.send(JSON.stringify(sendWinnerMsg));
+            gameStatus.gamesAborted++;
         } else {
             // one player in the game
             console.log("ONE PLAYER");

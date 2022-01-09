@@ -1,19 +1,8 @@
-const deckMap = {
-    c0: "kim",
-    c1: "putin",
-    c2: "trump",
-    c3: "stalin",
-    c4: "merkel",
-    c5: "boris",
-    c6: "jonas",
-    c7: "jinping",
-};
-
 function GameState(socket) {
     this.socket = socket;
     this.guess = [];
     this.playerType = null; // A or B
-    this.myTurn = null;
+    this.myTurn = false;
 }
 
 GameState.prototype.setStatus = function (statusText) {
@@ -103,7 +92,7 @@ function CardBoard(gs) {
                         gs.myTurn = false;
                         gs.guess = [];
                     }
-
+                    console.log("SSSENDING");
                     gs.socket.send(JSON.stringify(sendMsg));
                 } else {
                     console.log("Not my turn.");
@@ -154,7 +143,6 @@ function CardBoard(gs) {
             console.log("Received DECK");
             cb.initialize(msg.data);
             gs.playerType = msg.playerType;
-            gs.myTurn = gs.playerType === "A" ? true : false;
             gs.setStatus("Waiting for opponent");
         }
 
@@ -190,7 +178,8 @@ function CardBoard(gs) {
         }
 
         if (msg.type === "START") {
-            if (gs.myTurn == true) {
+            gs.myTurn = gs.playerType === "A" ? true : false;
+            if (gs.myTurn) {
                 cb.eraseGuess();
                 gs.setStatus("Your turn");
             } else {

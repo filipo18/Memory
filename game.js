@@ -45,14 +45,14 @@ Game.prototype.addPlayer = function (con) {
 
 Game.prototype.generateDeck = function () {
     let deck = [
-        "kim",
-        "putin",
-        "trump",
-        "jonas",
-        "jinping",
-        "merkel",
-        "boris",
-        "stalin",
+        "apple",
+        "banana",
+        "grape",
+        "kiwi",
+        "orange",
+        "pineapple",
+        "strawberry",
+        "watermelon",
     ];
     deck = deck.concat(deck);
 

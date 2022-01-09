@@ -22,7 +22,7 @@ body {
 
 .popup {
     background-color: white;
-    margin: 30% auto;
+    margin: 100px auto;
     padding: 20px;
     border: 1px solid black;
     width: 600px;
@@ -114,29 +114,29 @@ body {
     pointer-events: none;
 }
 
-.kim {
-    background-image: url("../images/kim.jpeg");
+.apple {
+    background-image: url("../images/apple.jpeg");
 }
-.boris {
-    background-image: url("../images/boris.jpeg");
+.banana {
+    background-image: url("../images/banana.jpeg");
 }
-.jinping {
-    background-image: url("../images/jinping.jpeg");
+.grape {
+    background-image: url("../images/grape.jpeg");
 }
-.jonas {
-    background-image: url("../images/jonas.jpeg");
+.kiwi {
+    background-image: url("../images/kiwi.jpeg");
 }
-.merkel {
-    background-image: url("../images/merkel.jpeg");
+.orange {
+    background-image: url("../images/orange.jpeg");
 }
-.putin {
-    background-image: url("../images/putin.jpeg");
+.pineapple {
+    background-image: url("../images/pineapple.jpeg");
 }
-.stalin {
-    background-image: url("../images/stalin.jpeg");
+.strawberry {
+    background-image: url("../images/strawberry.jpeg");
 }
-.trump {
-    background-image: url("../images/trump.jpeg");
+.watermelon {
+    background-image: url("../images/watermelon.jpeg");
 }
 
 .facedown {
